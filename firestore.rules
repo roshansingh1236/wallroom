@@ -1,0 +1,42 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // User Helper Functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+
+    // Users Collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isOwner(userId); // Initial creation on signup
+      allow update: if isOwner(userId); // Profile updates
+      allow delete: if false; // Only admin or soft delete
+    }
+
+    // Wallpapers Collection
+    match /wallpapers/{wallpaperId} {
+      allow read: if true; // Public feed
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && (resource.data.creatorId == request.auth.uid || resource.data.item_type == 'admin'); 
+      // Note: Incrementing downloads/likes should ideally be via Cloud Functions or highly restricted logic to prevent spam
+      allow delete: if isSignedIn() && resource.data.creatorId == request.auth.uid;
+    }
+
+    // Transactions (Coins) - SECURE: Read only, Write via Cloud Functions
+    match /transactions/{transactionId} {
+      allow read: if isSignedIn() && resource.data.userId == request.auth.uid;
+      allow write: if false; 
+    }
+    
+    // Config/Metadata (e.g., app settings)
+    match /config/{configId} {
+    	allow read: if true;
+      allow write: if false;
+    }
+  }
+}

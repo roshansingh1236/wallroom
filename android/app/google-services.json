@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "636022737942",
+    "project_id": "wallroom-4aa8b",
+    "storage_bucket": "wallroom-4aa8b.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:636022737942:android:eb69a98e9b0ae9d6bb3937",
+        "android_client_info": {
+          "package_name": "com.example.wallroom"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAJ9-h-aN7K5nd7Ms3pD270OA1seN8kFak"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
