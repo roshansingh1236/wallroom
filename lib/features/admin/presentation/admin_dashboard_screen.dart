@@ -12,7 +12,20 @@ class AdminDashboardScreen extends ConsumerWidget {
     final pendingAsync = ref.watch(pendingWallpapersProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text("Admin Dashboard")),
+      appBar: AppBar(
+        title: Row(
+          children: [
+            Image.asset(
+              'assets/logo/logo.png',
+              height: 32,
+              width: 32,
+              fit: BoxFit.contain,
+            ),
+            const Gap(12),
+            const Text("Admin Dashboard"),
+          ],
+        ),
+      ),
       body: Row(
         children: [
           // Side Nav (Responsive for Web)

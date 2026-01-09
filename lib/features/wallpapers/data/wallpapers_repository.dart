@@ -11,12 +11,47 @@ class WallpapersRepository {
 
   WallpapersRepository(this._firestore);
 
-  Stream<List<WallpaperModel>> getWallpapers() {
+  Stream<List<WallpaperModel>> getWallpapers({int limit = 20}) {
     return _firestore
         .collection('wallpapers')
         .orderBy('createdAt', descending: true)
+        .limit(limit)
         .snapshots()
         .map((snapshot) => snapshot.docs.map((doc) => WallpaperModel.fromDocument(doc)).toList());
+  }
+
+  Future<List<WallpaperModel>> getWallpapersPaginated({
+    int limit = 20,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    Query query = _firestore
+        .collection('wallpapers')
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    final snapshot = await query.get();
+    return snapshot.docs.map((doc) => WallpaperModel.fromDocument(doc)).toList();
+  }
+
+  Future<List<DocumentSnapshot>> getWallpapersPaginatedWithDocs({
+    int limit = 20,
+    DocumentSnapshot? lastDocument,
+  }) async {
+    Query query = _firestore
+        .collection('wallpapers')
+        .orderBy('createdAt', descending: true)
+        .limit(limit);
+
+    if (lastDocument != null) {
+      query = query.startAfterDocument(lastDocument);
+    }
+
+    final snapshot = await query.get();
+    return snapshot.docs;
   }
   
   Future<void> addWallpaper(WallpaperModel wallpaper) async {

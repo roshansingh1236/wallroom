@@ -128,20 +128,12 @@ class _LoginScreenState extends ConsumerState<LoginScreen> with SingleTickerProv
                       mainAxisSize: MainAxisSize.min,
                       children: [
                         // Logo/Icon
-                        Container(
-                          padding: const EdgeInsets.all(16),
-                          decoration: BoxDecoration(
-                            shape: BoxShape.circle,
-                            color: Colors.purpleAccent.withValues(alpha: 0.1),
-                            border: Border.all(color: Colors.purpleAccent.withValues(alpha: 0.2)),
-                          ),
-                          child: const Icon(
-                            Icons.wallpaper_rounded,
-                            size: 48,
-                            color: Colors.purpleAccent,
-                          ),
+                        Image.asset(
+                          'assets/logo/logo.png',
+                          height: 250,
+                          width: 250,
+                          fit: BoxFit.contain,
                         ),
-                        const Gap(24),
                         
                         // Branded Title
                         RichText(
