@@ -17,7 +17,11 @@ class WallpapersRepository {
         .orderBy('createdAt', descending: true)
         .limit(limit)
         .snapshots()
-        .map((snapshot) => snapshot.docs.map((doc) => WallpaperModel.fromDocument(doc)).toList());
+        .map(
+          (snapshot) => snapshot.docs
+              .map((doc) => WallpaperModel.fromDocument(doc))
+              .toList(),
+        );
   }
 
   Future<List<WallpaperModel>> getWallpapersPaginated({
@@ -34,7 +38,9 @@ class WallpapersRepository {
     }
 
     final snapshot = await query.get();
-    return snapshot.docs.map((doc) => WallpaperModel.fromDocument(doc)).toList();
+    return snapshot.docs
+        .map((doc) => WallpaperModel.fromDocument(doc))
+        .toList();
   }
 
   Future<List<DocumentSnapshot>> getWallpapersPaginatedWithDocs({
@@ -53,15 +59,22 @@ class WallpapersRepository {
     final snapshot = await query.get();
     return snapshot.docs;
   }
-  
+
   Future<void> addWallpaper(WallpaperModel wallpaper) async {
-    await _firestore.collection('wallpapers').doc(wallpaper.id).set({
-      ...wallpaper.toJson(),
-      'createdAt': FieldValue.serverTimestamp(),
-    }..remove('id'));
+    await _firestore
+        .collection('wallpapers')
+        .doc(wallpaper.id)
+        .set(
+          {...wallpaper.toJson(), 'createdAt': FieldValue.serverTimestamp()}
+            ..remove('id'),
+        );
   }
 
-  Future<void> generateWallpaper({required String prompt, required String aspectRatio, required String style}) async {
+  Future<Map<String, dynamic>?> generateWallpaper({
+    required String prompt,
+    required String aspectRatio,
+    required String style,
+  }) async {
     final functions = FirebaseFunctions.instance;
     final result = await functions.httpsCallable('generateWallpaper').call({
       'prompt': prompt,
@@ -70,9 +83,13 @@ class WallpapersRepository {
     });
     // The function saves to Firestore, so the stream will update automatically.
     // result.data contains success/url if needed manually.
+    return result.data as Map<String, dynamic>?;
   }
 
-  Future<void> downloadWallpaper({required String wallpaperId, required String creatorId}) async {
+  Future<void> downloadWallpaper({
+    required String wallpaperId,
+    required String creatorId,
+  }) async {
     final functions = FirebaseFunctions.instance;
     await functions.httpsCallable('onDownload').call({
       'wallpaperId': wallpaperId,

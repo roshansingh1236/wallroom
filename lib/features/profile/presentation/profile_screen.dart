@@ -14,49 +14,56 @@ class ProfileScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: const Color(0xFF0F0F0F),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          "Profile",
-          style: GoogleFonts.outfit(
-            fontSize: 24,
-            fontWeight: FontWeight.w700,
-            color: Colors.white,
-          ),
-        ),
-        actions: [
-          IconButton(
-            icon: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.red.withValues(alpha: 0.2),
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(
-                  color: Colors.red.withValues(alpha: 0.3),
-                  width: 1,
-                ),
+      body: SafeArea(
+        child: Column(
+          children: [
+            // Header with Title and Logout
+            Padding(
+              padding: const EdgeInsets.all(20),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    "Profile",
+                    style: GoogleFonts.outfit(
+                      fontSize: 24,
+                      fontWeight: FontWeight.w700,
+                      color: Colors.white,
+                    ),
+                  ),
+                  IconButton(
+                    icon: Container(
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.red.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: Colors.red.withValues(alpha: 0.3),
+                          width: 1,
+                        ),
+                      ),
+                      child: const Icon(Icons.logout, color: Colors.red, size: 20),
+                    ),
+                    onPressed: () {
+                      _showLogoutDialog(context, ref);
+                    },
+                  ),
+                ],
               ),
-              child: const Icon(Icons.logout, color: Colors.red, size: 20),
             ),
-            onPressed: () {
-              _showLogoutDialog(context, ref);
-            },
-          ),
-          const Gap(8),
-        ],
-      ),
-      body: userAsync.when(
-        data: (user) {
-          if (user == null) {
-          return Center(
-              child: Text(
-                "Not logged in",
-                style: GoogleFonts.outfit(color: Colors.white70),
-              ),
-            );
-          }
-          return Stack(
+            // Content
+            Expanded(
+              child: userAsync.when(
+                data: (user) {
+                  if (user == null) {
+                    return Center(
+                      child: Text(
+                        "Not logged in",
+                        style: GoogleFonts.outfit(color: Colors.white70),
+                      ),
+                    );
+                  }
+                  return Stack(
             children: [
               // Gradient Background
               Container(
@@ -291,40 +298,44 @@ class ProfileScreen extends ConsumerWidget {
                   ],
                 ),
               ),
-            ],
-          );
-        },
-        error: (err, stack) => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Icon(Icons.error_outline, color: Colors.red, size: 48),
-              const Gap(16),
-              Text(
-                "Error: $err",
-                style: GoogleFonts.outfit(color: Colors.white70),
-                textAlign: TextAlign.center,
-              ),
-            ],
-          ),
-        ),
-        loading: () => Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              const CircularProgressIndicator(
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.purpleAccent),
-              ),
-              const Gap(16),
-              Text(
-                "Loading profile...",
-                style: GoogleFonts.outfit(
-                  color: Colors.white70,
-                  fontSize: 16,
+                  ],
+                );
+                },
+                error: (err, stack) => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.error_outline, color: Colors.red, size: 48),
+                      const Gap(16),
+                      Text(
+                        "Error: $err",
+                        style: GoogleFonts.outfit(color: Colors.white70),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+                loading: () => Center(
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const CircularProgressIndicator(
+                        valueColor: AlwaysStoppedAnimation<Color>(Colors.purpleAccent),
+                      ),
+                      const Gap(16),
+                      Text(
+                        "Loading profile...",
+                        style: GoogleFonts.outfit(
+                          color: Colors.white70,
+                          fontSize: 16,
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );

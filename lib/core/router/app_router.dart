@@ -28,9 +28,10 @@ GoRouter goRouter(Ref ref) {
     redirect: (context, state) {
       final isLoggedIn = authState.asData?.value != null;
       final currentPath = state.uri.path;
-      final isSplashOrWelcome = currentPath == '/splash' || 
-                                 currentPath == '/welcome' || 
-                                 currentPath == '/welcome-grid';
+      final isSplashOrWelcome =
+          currentPath == '/splash' ||
+          currentPath == '/welcome' ||
+          currentPath == '/welcome-grid';
       final isLoggingIn = currentPath == '/login';
 
       // Allow splash and welcome screens without auth check
@@ -49,7 +50,7 @@ GoRouter goRouter(Ref ref) {
       return null;
     },
     // Using stream listenable to trigger redirects
-    refreshListenable: AuthStateListenable(authState), 
+    refreshListenable: AuthStateListenable(authState),
     routes: [
       GoRoute(
         path: '/splash',
@@ -63,10 +64,7 @@ GoRouter goRouter(Ref ref) {
         path: '/welcome-grid',
         builder: (context, state) => const WelcomeGridScreen(),
       ),
-      GoRoute(
-        path: '/login',
-        builder: (context, state) => const LoginScreen(),
-      ),
+      GoRoute(path: '/login', builder: (context, state) => const LoginScreen()),
       GoRoute(
         path: '/admin',
         builder: (context, state) => const AdminDashboardScreen(),

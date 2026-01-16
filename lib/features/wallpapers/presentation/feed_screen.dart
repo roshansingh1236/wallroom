@@ -23,7 +23,8 @@ class FeedScreen extends ConsumerStatefulWidget {
   ConsumerState<FeedScreen> createState() => _FeedScreenState();
 }
 
-class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStateMixin {
+class _FeedScreenState extends ConsumerState<FeedScreen>
+    with TickerProviderStateMixin {
   List<String> _categories = ["All"];
   String _selectedCategory = "All";
   late AnimationController _animController;
@@ -34,7 +35,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
   bool _isSearchActive = false;
   String _searchQuery = '';
   Timer? _searchDebounceTimer;
-  
+
   // Pagination state
   List<WallpaperModel> _allWallpapers = [];
   dynamic _lastDocument;
@@ -45,11 +46,49 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
   // Category keywords mapping
   static const Map<String, List<String>> _categoryKeywords = {
     "Abstract": ["abstract", "liquid", "ripples", "flowing", "artistic"],
-    "Nature": ["nature", "forest", "mountain", "lake", "sunrise", "sunset", "landscape", "pine", "desert", "sand"],
-    "Cyberpunk": ["cyberpunk", "neon", "futuristic", "city", "street", "night", "tech"],
+    "Nature": [
+      "nature",
+      "forest",
+      "mountain",
+      "lake",
+      "sunrise",
+      "sunset",
+      "landscape",
+      "pine",
+      "desert",
+      "sand",
+    ],
+    "Cyberpunk": [
+      "cyberpunk",
+      "neon",
+      "futuristic",
+      "city",
+      "street",
+      "night",
+      "tech",
+    ],
     "Anime": ["anime", "cartoon", "kawaii", "manga", "japanese"],
-    "Minimal": ["minimal", "minimalist", "simple", "clean", "white", "black", "marble", "texture"],
-    "Space": ["space", "galaxy", "star", "planet", "cosmic", "astronaut", "nebula", "station", "portal"],
+    "Minimal": [
+      "minimal",
+      "minimalist",
+      "simple",
+      "clean",
+      "white",
+      "black",
+      "marble",
+      "texture",
+    ],
+    "Space": [
+      "space",
+      "galaxy",
+      "star",
+      "planet",
+      "cosmic",
+      "astronaut",
+      "nebula",
+      "station",
+      "portal",
+    ],
   };
 
   @override
@@ -64,7 +103,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
       duration: const Duration(milliseconds: 300),
     );
     _animController.forward();
-    
+
     _searchController.addListener(_onSearchChanged);
     _searchFocusNode.addListener(() {
       if (_searchFocusNode.hasFocus && !_isSearchActive) {
@@ -72,17 +111,21 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
       }
     });
   }
-  
+
   void _setupScrollListener(WidgetRef ref) {
     _scrollController.addListener(() {
-      if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.8) {
+      if (_scrollController.position.pixels >=
+          _scrollController.position.maxScrollExtent * 0.8) {
         _loadMoreWallpapers(ref);
       }
     });
   }
-  
+
   Future<void> _loadMoreWallpapers(WidgetRef ref) async {
-    if (_isLoadingMore || !_hasMore || _searchQuery.isNotEmpty || _selectedCategory != "All") {
+    if (_isLoadingMore ||
+        !_hasMore ||
+        _searchQuery.isNotEmpty ||
+        _selectedCategory != "All") {
       return;
     }
 
@@ -105,8 +148,10 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
         return;
       }
 
-      final newWallpapers = docs.map((doc) => WallpaperModel.fromDocument(doc)).toList();
-      
+      final newWallpapers = docs
+          .map((doc) => WallpaperModel.fromDocument(doc))
+          .toList();
+
       setState(() {
         _allWallpapers.addAll(newWallpapers);
         _lastDocument = docs.last;
@@ -121,7 +166,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
       });
     }
   }
-  
+
   Future<void> _refreshWallpapers(WidgetRef ref) async {
     setState(() {
       _allWallpapers = [];
@@ -129,7 +174,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
       _hasMore = true;
       _isLoadingMore = false;
     });
-    
+
     // Force stream to reload
     ref.invalidate(wallpapersStreamProvider);
   }
@@ -158,7 +203,7 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
     setState(() {
       _isSearchActive = isActive;
     });
-    
+
     if (isActive) {
       _searchAnimController.forward();
       Future.delayed(const Duration(milliseconds: 150), () {
@@ -174,32 +219,32 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
 
   void _updateCategories(List<WallpaperModel> wallpapers) {
     final Set<String> availableCategories = {"All"};
-    
+
     // Combine stream wallpapers with stock wallpapers
-    final allAvailableWallpapers = [
-      ...wallpapers,
-      ...kStockWallpapers,
-    ];
-    
+    final allAvailableWallpapers = [...wallpapers, ...kStockWallpapers];
+
     // Check each category against all wallpapers
     for (final categoryEntry in _categoryKeywords.entries) {
       final categoryName = categoryEntry.key;
       final keywords = categoryEntry.value;
-      
+
       // Check if any wallpaper matches this category
       final hasMatch = allAvailableWallpapers.any((wallpaper) {
         final promptLower = wallpaper.prompt.toLowerCase();
         return keywords.any((keyword) => promptLower.contains(keyword));
       });
-      
+
       if (hasMatch) {
         availableCategories.add(categoryName);
       }
     }
-    
+
     // Update categories if they changed
-    final sortedCategories = ["All", ...availableCategories.where((c) => c != "All").toList()..sort()];
-    if (_categories.length != sortedCategories.length || 
+    final sortedCategories = [
+      "All",
+      ...availableCategories.where((c) => c != "All").toList()..sort(),
+    ];
+    if (_categories.length != sortedCategories.length ||
         !_categories.every((cat) => sortedCategories.contains(cat))) {
       setState(() {
         _categories = sortedCategories;
@@ -216,158 +261,16 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
     final wallpapersAsync = ref.watch(wallpapersStreamProvider);
 
     return Scaffold(
-      extendBodyBehindAppBar: true,
-      appBar: AppBar(
-        title: AnimatedBuilder(
-          animation: _searchAnimController,
-          builder: (context, child) {
-            return ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 200),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  SizedBox(
-                    width: 50,
-                    height: 50,
-                    child: Image.asset(
-                      'assets/logo/logo.png',
-                      fit: BoxFit.contain,
-                    ),
-                  ),
-                  const Gap(4),
-                  Flexible(
-                    child: AnimatedOpacity(
-                      opacity: 1 - _searchAnimController.value,
-                      duration: const Duration(milliseconds: 200),
-                      child: Text(
-                        "WALLROOM",
-                        style: GoogleFonts.outfit(
-                          fontWeight: FontWeight.w900,
-                          letterSpacing: 3,
-                          fontSize: 17,
-                          color: Colors.white,
-                        ),
-                        overflow: TextOverflow.ellipsis,
-                        maxLines: 1,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            );
-          },
-        ),
-        centerTitle: false,
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        flexibleSpace: ClipRRect(
-          child: FakeGlass(
-            shape: const LiquidRoundedRectangle(borderRadius: 0.0),
-            settings: kIOSLiquidGlassSettings,
-            child: Container(color: Colors.transparent),
-          ),
-        ),
-        actions: [
-          AnimatedBuilder(
-            animation: _searchAnimController,
-            builder: (context, child) {
-              final width = MediaQuery.of(context).size.width;
-              final searchWidth = width * 0.6 * _searchAnimController.value;
-              
-              return Row(
-                children: [
-                  if (_searchAnimController.value > 0)
-                    AnimatedOpacity(
-                      opacity: _searchAnimController.value,
-                      duration: const Duration(milliseconds: 150),
-                      child: Container(
-                        width: searchWidth.clamp(0.0, width * 0.6),
-                        height: 40,
-                        margin: const EdgeInsets.only(right: 8),
-                        child: FakeGlass(
-                          shape: const LiquidRoundedRectangle(borderRadius: 20.0),
-                          settings: kIOSLiquidGlassSettings.copyWith(
-                            glassColor: Colors.white.withValues(alpha: 0.1),
-                          ),
-                          child: Container(
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                            ),
-                            child: ValueListenableBuilder<TextEditingValue>(
-                              valueListenable: _searchController,
-                              builder: (context, value, child) {
-                                return TextField(
-                                  controller: _searchController,
-                                  focusNode: _searchFocusNode,
-                                  style: GoogleFonts.outfit(
-                                    color: Colors.white,
-                                    fontSize: 14,
-                                    fontWeight: FontWeight.w500,
-                                  ),
-                                  decoration: InputDecoration(
-                                    hintText: 'Search wallpapers...',
-                                    hintStyle: GoogleFonts.outfit(
-                                      color: Colors.white.withValues(alpha: 0.5),
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w400,
-                                    ),
-                                    prefixIcon: Icon(
-                                      Icons.search_rounded,
-                                      color: Colors.white.withValues(alpha: 0.7),
-                                      size: 20,
-                                    ),
-                                    suffixIcon: value.text.isNotEmpty
-                                        ? IconButton(
-                                            icon: Icon(
-                                              Icons.clear_rounded,
-                                              color: Colors.white.withValues(alpha: 0.7),
-                                              size: 20,
-                                            ),
-                                            onPressed: () {
-                                              _searchController.clear();
-                                              setState(() {
-                                                _searchQuery = '';
-                                              });
-                                            },
-                                          )
-                                        : null,
-                                    border: InputBorder.none,
-                                    contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                                    isDense: true,
-                                  ),
-                                );
-                              },
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-          IconButton(
-                    icon: Icon(
-                      _isSearchActive ? Icons.close_rounded : Icons.search_rounded,
-                      color: Colors.white,
-                    ),
-                    onPressed: () => _toggleSearch(!_isSearchActive),
-          ),
-          const Gap(8),
-                ],
-              );
-            },
-          ),
-        ],
-      ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: Color(0xFF080808),
-        ),
+        decoration: const BoxDecoration(color: Color(0xFF080808)),
         child: SafeArea(
+          top: false,
           bottom: false,
           child: Column(
             children: [
               // Categories
               _buildCategories(),
-              
+
               // Grid
               Expanded(
                 child: wallpapersAsync.when(
@@ -405,22 +308,31 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                         }
                       });
                     }
-                    
+
                     // Use stream wallpapers if no pagination yet, otherwise use paginated list
-                    final baseWallpapers = _allWallpapers.isEmpty ? wallpapers : _allWallpapers;
+                    final baseWallpapers = _allWallpapers.isEmpty
+                        ? wallpapers
+                        : _allWallpapers;
                     var filteredWallpapers = baseWallpapers;
 
                     // Filter by category
                     if (_selectedCategory != "All") {
                       filteredWallpapers = filteredWallpapers
-                          .where((w) => w.prompt.toLowerCase().contains(_selectedCategory.toLowerCase()))
+                          .where(
+                            (w) => w.prompt.toLowerCase().contains(
+                              _selectedCategory.toLowerCase(),
+                            ),
+                          )
                           .toList();
                     }
 
                     // Filter by search query
                     if (_searchQuery.isNotEmpty) {
                       filteredWallpapers = filteredWallpapers
-                          .where((w) => w.prompt.toLowerCase().contains(_searchQuery))
+                          .where(
+                            (w) =>
+                                w.prompt.toLowerCase().contains(_searchQuery),
+                          )
                           .toList();
                     }
 
@@ -431,21 +343,32 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                       // Filter stock wallpapers by category
                       if (_selectedCategory != "All") {
                         stockFiltered = stockFiltered
-                            .where((w) => w.prompt.toLowerCase().contains(_selectedCategory.toLowerCase()))
+                            .where(
+                              (w) => w.prompt.toLowerCase().contains(
+                                _selectedCategory.toLowerCase(),
+                              ),
+                            )
                             .toList();
                       }
 
                       // Filter stock wallpapers by search query
                       if (_searchQuery.isNotEmpty) {
                         stockFiltered = stockFiltered
-                            .where((w) => w.prompt.toLowerCase().contains(_searchQuery))
+                            .where(
+                              (w) =>
+                                  w.prompt.toLowerCase().contains(_searchQuery),
+                            )
                             .toList();
                       }
 
-                      filteredWallpapers = stockFiltered.isEmpty ? kStockWallpapers : stockFiltered;
+                      filteredWallpapers = stockFiltered.isEmpty
+                          ? kStockWallpapers
+                          : stockFiltered;
                     }
 
-                    if (filteredWallpapers.isEmpty && (_searchQuery.isNotEmpty || _selectedCategory != "All")) {
+                    if (filteredWallpapers.isEmpty &&
+                        (_searchQuery.isNotEmpty ||
+                            _selectedCategory != "All")) {
                       // Empty state for search/category filters
                       return Center(
                         child: Padding(
@@ -458,7 +381,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                                 decoration: BoxDecoration(
                                   shape: BoxShape.circle,
                                   color: Colors.white.withValues(alpha: 0.05),
-                                  border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                                  border: Border.all(
+                                    color: Colors.white.withValues(alpha: 0.1),
+                                  ),
                                 ),
                                 child: Icon(
                                   Icons.search_off_rounded,
@@ -490,15 +415,24 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                               if (_searchQuery.isNotEmpty) ...[
                                 const Gap(24),
                                 FakeGlass(
-                                  shape: const LiquidRoundedRectangle(borderRadius: 16.0),
+                                  shape: const LiquidRoundedRectangle(
+                                    borderRadius: 16.0,
+                                  ),
                                   settings: kIOSLiquidGlassSettings,
                                   child: GestureDetector(
                                     onTap: () => _toggleSearch(false),
                                     child: Container(
-                                      padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                                      padding: const EdgeInsets.symmetric(
+                                        horizontal: 24,
+                                        vertical: 12,
+                                      ),
                                       decoration: BoxDecoration(
                                         borderRadius: BorderRadius.circular(16),
-                                        border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                                        border: Border.all(
+                                          color: Colors.white.withValues(
+                                            alpha: 0.1,
+                                          ),
+                                        ),
                                       ),
                                       child: Text(
                                         "Clear Search",
@@ -527,95 +461,110 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                         physics: const AlwaysScrollableScrollPhysics(
                           parent: BouncingScrollPhysics(),
                         ),
-                      slivers: [
-                        // Search results header (if searching)
-                        if (_searchQuery.isNotEmpty && filteredWallpapers.isNotEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.fromLTRB(20, 24, 20, 16),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 4,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      color: Colors.purpleAccent,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
-                                  const Gap(10),
-                                  Text(
-                                    "SEARCH RESULTS (${filteredWallpapers.length})",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-
-                        // Featured Carousel (only show when not searching)
-                        if (_searchQuery.isEmpty)
-                        SliverToBoxAdapter(
-                          child: _buildFeaturedCarousel(ref),
-                        ),
-
-                        if (isShowingStock && _searchQuery.isEmpty)
-                          SliverToBoxAdapter(
-                            child: Padding(
-                              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                              child: Row(
-                                children: [
-                                  Container(
-                                    width: 4,
-                                    height: 16,
-                                    decoration: BoxDecoration(
-                                      color: Colors.purpleAccent,
-                                      borderRadius: BorderRadius.circular(2),
-                                    ),
-                                  ),
-                                  const Gap(10),
-                                  Text(
-                                    "FEATURED COLLECTION",
-                                    style: GoogleFonts.outfit(
-                                      color: Colors.white70,
-                                      fontWeight: FontWeight.w700,
-                                      fontSize: 12,
-                                      letterSpacing: 1.5,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          ),
-                          
-                        SliverPadding(
-                          padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
-                          sliver: SliverMasonryGrid.count(
-                            crossAxisCount: 2,
-                            mainAxisSpacing: 16,
-                            crossAxisSpacing: 16,
-                            itemBuilder: (context, index) {
-                              final wallpaper = filteredWallpapers[index];
-                              return _AnimatedGridItem(
-                                index: index,
-                                controller: _animController,
-                                child: WallpaperCard(
-                                  wallpaper: wallpaper,
-                                  onTap: () => _showWallpaperDetail(context, ref, wallpaper),
+                        slivers: [
+                          // Search results header (if searching)
+                          if (_searchQuery.isNotEmpty &&
+                              filteredWallpapers.isNotEmpty)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.fromLTRB(
+                                  20,
+                                  24,
+                                  20,
+                                  16,
                                 ),
-                              );
-                            },
-                            childCount: filteredWallpapers.length,
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 4,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color: Colors.purpleAccent,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                    const Gap(10),
+                                    Text(
+                                      "SEARCH RESULTS (${filteredWallpapers.length})",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                          // Featured Carousel (only show when not searching)
+                          if (_searchQuery.isEmpty)
+                            SliverToBoxAdapter(
+                              child: _buildFeaturedCarousel(ref),
+                            ),
+
+                          if (isShowingStock && _searchQuery.isEmpty)
+                            SliverToBoxAdapter(
+                              child: Padding(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 20,
+                                  vertical: 12,
+                                ),
+                                child: Row(
+                                  children: [
+                                    Container(
+                                      width: 4,
+                                      height: 16,
+                                      decoration: BoxDecoration(
+                                        color: Colors.purpleAccent,
+                                        borderRadius: BorderRadius.circular(2),
+                                      ),
+                                    ),
+                                    const Gap(10),
+                                    Text(
+                                      "FEATURED COLLECTION",
+                                      style: GoogleFonts.outfit(
+                                        color: Colors.white70,
+                                        fontWeight: FontWeight.w700,
+                                        fontSize: 12,
+                                        letterSpacing: 1.5,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ),
+
+                          SliverPadding(
+                            padding: const EdgeInsets.fromLTRB(16, 8, 16, 24),
+                            sliver: SliverMasonryGrid.count(
+                              crossAxisCount: 2,
+                              mainAxisSpacing: 16,
+                              crossAxisSpacing: 16,
+                              itemBuilder: (context, index) {
+                                final wallpaper = filteredWallpapers[index];
+                                return _AnimatedGridItem(
+                                  index: index,
+                                  controller: _animController,
+                                  child: WallpaperCard(
+                                    wallpaper: wallpaper,
+                                    onTap: () => _showWallpaperDetail(
+                                      context,
+                                      ref,
+                                      wallpaper,
+                                    ),
+                                  ),
+                                );
+                              },
+                              childCount: filteredWallpapers.length,
+                            ),
                           ),
-                        ),
-                          
+
                           // Loading indicator at bottom for lazy loading
-                          if (_isLoadingMore && _searchQuery.isEmpty && _selectedCategory == "All")
+                          if (_isLoadingMore &&
+                              _searchQuery.isEmpty &&
+                              _selectedCategory == "All")
                             SliverToBoxAdapter(
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
@@ -627,9 +576,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                                 ),
                               ),
                             ),
-                          
+
                           // End of list indicator
-                          if (!_hasMore && _allWallpapers.isNotEmpty && _searchQuery.isEmpty && _selectedCategory == "All")
+                          if (!_hasMore &&
+                              _allWallpapers.isNotEmpty &&
+                              _searchQuery.isEmpty &&
+                              _selectedCategory == "All")
                             SliverToBoxAdapter(
                               child: Padding(
                                 padding: const EdgeInsets.all(24),
@@ -637,7 +589,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                                   child: Text(
                                     "You've reached the end",
                                     style: GoogleFonts.outfit(
-                                      color: Colors.white.withValues(alpha: 0.5),
+                                      color: Colors.white.withValues(
+                                        alpha: 0.5,
+                                      ),
                                       fontSize: 12,
                                       fontWeight: FontWeight.w400,
                                     ),
@@ -649,7 +603,12 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                       ),
                     );
                   },
-                  error: (err, stack) => Center(child: Text("Error: $err", style: const TextStyle(color: Colors.redAccent))),
+                  error: (err, stack) => Center(
+                    child: Text(
+                      "Error: $err",
+                      style: const TextStyle(color: Colors.redAccent),
+                    ),
+                  ),
                   loading: () => _buildShimmerLoader(),
                 ),
               ),
@@ -708,7 +667,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                         CachedNetworkImage(
                           imageUrl: wallpaper.imageUrl,
                           fit: BoxFit.cover,
-                          placeholder: (context, url) => Container(color: Colors.white.withValues(alpha: 0.05)),
+                          placeholder: (context, url) => Container(
+                            color: Colors.white.withValues(alpha: 0.05),
+                          ),
                         ),
                         Positioned.fill(
                           child: DecoratedBox(
@@ -794,16 +755,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
               curve: Curves.easeOutCubic,
               decoration: BoxDecoration(
                 borderRadius: BorderRadius.circular(20),
-                boxShadow: isSelected ? [
-                  BoxShadow(
-                    color: categoryColor.withValues(alpha: 0.4),
-                    offset: const Offset(2, 2),
-                  )
-                ] : [],
+                boxShadow: isSelected
+                    ? [
+                        BoxShadow(
+                          color: categoryColor.withValues(alpha: 0.4),
+                          offset: const Offset(2, 2),
+                        ),
+                      ]
+                    : [],
               ),
               child: FakeGlass(
                 shape: const LiquidRoundedRectangle(borderRadius: 20.0),
-                settings: isSelected 
+                settings: isSelected
                     ? kIOSLiquidGlassSettings.copyWith(
                         glassColor: categoryColor.withValues(alpha: 0.2),
                         thickness: 12,
@@ -813,14 +776,20 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                   padding: const EdgeInsets.symmetric(horizontal: 20),
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(20),
-                    border: isSelected ? null : Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                    border: isSelected
+                        ? null
+                        : Border.all(
+                            color: Colors.white.withValues(alpha: 0.05),
+                          ),
                   ),
                   child: Center(
                     child: Text(
                       cat,
                       style: GoogleFonts.outfit(
                         color: isSelected ? Colors.white : Colors.white60,
-                        fontWeight: isSelected ? FontWeight.w700 : FontWeight.w500,
+                        fontWeight: isSelected
+                            ? FontWeight.w700
+                            : FontWeight.w500,
                         fontSize: 14,
                       ),
                     ),
@@ -875,7 +844,9 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
                           borderRadius: BorderRadius.circular(28),
                           boxShadow: [
                             BoxShadow(
-                              color: Colors.purpleAccent.withValues(alpha: 0.05),
+                              color: Colors.purpleAccent.withValues(
+                                alpha: 0.05,
+                              ),
                               blurRadius: 20,
                               offset: const Offset(0, 10),
                             ),
@@ -898,9 +869,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
               crossAxisSpacing: 16,
               itemBuilder: (context, index) {
                 // Create varied heights for masonry effect
-                final heights = [200.0, 250.0, 180.0, 220.0, 240.0, 190.0, 230.0, 210.0];
+                final heights = [
+                  200.0,
+                  250.0,
+                  180.0,
+                  220.0,
+                  240.0,
+                  190.0,
+                  230.0,
+                  210.0,
+                ];
                 final height = heights[index % heights.length];
-                
+
                 return Container(
                   height: height,
                   decoration: BoxDecoration(
@@ -949,13 +929,18 @@ class _FeedScreenState extends ConsumerState<FeedScreen> with TickerProviderStat
     );
   }
 
-  void _showWallpaperDetail(BuildContext context, WidgetRef ref, WallpaperModel wallpaper) {
+  void _showWallpaperDetail(
+    BuildContext context,
+    WidgetRef ref,
+    WallpaperModel wallpaper,
+  ) {
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.black.withValues(alpha: 0.9),
-      builder: (context) => _ImmersiveWallpaperDetail(wallpaper: wallpaper, ref: ref),
+      builder: (context) =>
+          _ImmersiveWallpaperDetail(wallpaper: wallpaper, ref: ref),
     );
   }
 }
@@ -980,7 +965,9 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
           // Background Image with Blur
           Positioned.fill(
             child: ClipRRect(
-              borderRadius: const BorderRadius.vertical(top: Radius.circular(40)),
+              borderRadius: const BorderRadius.vertical(
+                top: Radius.circular(40),
+              ),
               child: Opacity(
                 opacity: 0.2,
                 child: CachedNetworkImage(
@@ -990,7 +977,7 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
               ),
             ),
           ),
-          
+
           // Content
           Column(
             children: [
@@ -1011,36 +998,42 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       // Preview Card
-                      Container(
-                        height: MediaQuery.of(context).size.height * 0.5,
-                        width: double.infinity,
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(32),
-                          boxShadow: [
-                            BoxShadow(
-                              color: Colors.black.withValues(alpha: 0.5),
-                              blurRadius: 30,
-                              offset: const Offset(0, 15),
-                            ),
-                          ],
-                        ),
-                        child: Hero(
-                          tag: wallpaper.id,
-                          child: ClipRRect(
+                      GestureDetector(
+                        onTap: () =>
+                            _showFullScreenImage(context, wallpaper.imageUrl),
+                        child: Container(
+                          height: MediaQuery.of(context).size.height * 0.5,
+                          width: double.infinity,
+                          decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(32),
-                            child: CachedNetworkImage(
-                              imageUrl: wallpaper.imageUrl,
-                              fit: BoxFit.cover,
-                              placeholder: (context, url) => Container(
-                                color: Colors.white.withValues(alpha: 0.05),
-                                child: const Center(child: CircularProgressIndicator()),
+                            boxShadow: [
+                              BoxShadow(
+                                color: Colors.black.withValues(alpha: 0.5),
+                                blurRadius: 30,
+                                offset: const Offset(0, 15),
+                              ),
+                            ],
+                          ),
+                          child: Hero(
+                            tag: wallpaper.id,
+                            child: ClipRRect(
+                              borderRadius: BorderRadius.circular(32),
+                              child: CachedNetworkImage(
+                                imageUrl: wallpaper.imageUrl,
+                                fit: BoxFit.cover,
+                                placeholder: (context, url) => Container(
+                                  color: Colors.white.withValues(alpha: 0.05),
+                                  child: const Center(
+                                    child: CircularProgressIndicator(),
+                                  ),
+                                ),
                               ),
                             ),
                           ),
                         ),
                       ),
                       const Gap(32),
-                      
+
                       // Prompt Section
                       Text(
                         "ARTIST'S PROMPT",
@@ -1059,7 +1052,9 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
                           padding: const EdgeInsets.all(20),
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(24),
-                            border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                            border: Border.all(
+                              color: Colors.white.withValues(alpha: 0.1),
+                            ),
                           ),
                           child: Text(
                             wallpaper.prompt,
@@ -1073,13 +1068,14 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
                         ),
                       ),
                       const Gap(32),
-                      
+
                       // Actions
                       Row(
                         children: [
                           Expanded(
                             child: _ModernActionButton(
-                              onPressed: () => _handleDownload(context, ref, wallpaper),
+                              onPressed: () =>
+                                  _handleDownload(context, ref, wallpaper),
                               icon: Icons.download_rounded,
                               label: "GET WALLPAPER",
                               primary: true,
@@ -1100,7 +1096,7 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
               ),
             ],
           ),
-          
+
           // Close Button
           Positioned(
             top: 85,
@@ -1114,7 +1110,11 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
                   shape: BoxShape.circle,
                   border: Border.all(color: Colors.white10),
                 ),
-                child: const Icon(Icons.close_rounded, color: Colors.white, size: 24),
+                child: const Icon(
+                  Icons.close_rounded,
+                  color: Colors.white,
+                  size: 24,
+                ),
               ),
             ),
           ),
@@ -1123,19 +1123,29 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
     );
   }
 
-  Future<void> _handleDownload(BuildContext context, WidgetRef ref, WallpaperModel wallpaper) async {
+  Future<void> _handleDownload(
+    BuildContext context,
+    WidgetRef ref,
+    WallpaperModel wallpaper,
+  ) async {
     try {
       final adHelper = ref.read(adHelperProvider);
       final didWatchAd = await adHelper.showRewardedAd();
 
       if (!didWatchAd) {
         if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Please watch the ad to support the creator.")));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text("Please watch the ad to support the creator."),
+            ),
+          );
         }
         return;
       }
 
-      await ref.read(wallpapersRepositoryProvider).downloadWallpaper(
+      await ref
+          .read(wallpapersRepositoryProvider)
+          .downloadWallpaper(
             wallpaperId: wallpaper.id,
             creatorId: wallpaper.creatorId,
           );
@@ -1143,14 +1153,27 @@ class _ImmersiveWallpaperDetail extends StatelessWidget {
       await Gal.putImage(wallpaper.imageUrl);
 
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text("Wallpaper saved to Gallery!")));
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("Wallpaper saved to Gallery!")),
+        );
         if (Navigator.canPop(context)) Navigator.pop(context);
       }
     } catch (e) {
       if (context.mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text("Error: $e")));
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text("Error: $e")));
       }
     }
+  }
+
+  void _showFullScreenImage(BuildContext context, String imageUrl) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => _FullScreenImageViewer(imageUrl: imageUrl),
+        fullscreenDialog: true,
+      ),
+    );
   }
 }
 
@@ -1173,10 +1196,13 @@ class _ModernActionButton extends StatelessWidget {
       onTap: onPressed,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
-        padding: EdgeInsets.symmetric(vertical: 18, horizontal: primary ? 24 : 18),
+        padding: EdgeInsets.symmetric(
+          vertical: 18,
+          horizontal: primary ? 24 : 18,
+        ),
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(20),
-          gradient: primary 
+          gradient: primary
               ? const LinearGradient(
                   colors: [Colors.purpleAccent, Colors.deepPurpleAccent],
                   begin: Alignment.topLeft,
@@ -1184,14 +1210,18 @@ class _ModernActionButton extends StatelessWidget {
                 )
               : null,
           color: primary ? null : Colors.white.withValues(alpha: 0.05),
-          border: primary ? null : Border.all(color: Colors.white.withValues(alpha: 0.1)),
-          boxShadow: primary ? [
-            BoxShadow(
-              color: Colors.purpleAccent.withValues(alpha: 0.3),
-              blurRadius: 15,
-              offset: const Offset(0, 8),
-            )
-          ] : [],
+          border: primary
+              ? null
+              : Border.all(color: Colors.white.withValues(alpha: 0.1)),
+          boxShadow: primary
+              ? [
+                  BoxShadow(
+                    color: Colors.purpleAccent.withValues(alpha: 0.3),
+                    blurRadius: 15,
+                    offset: const Offset(0, 8),
+                  ),
+                ]
+              : [],
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -1252,6 +1282,79 @@ class _AnimatedGridItem extends StatelessWidget {
         );
       },
       child: child,
+    );
+  }
+}
+
+class _FullScreenImageViewer extends StatelessWidget {
+  final String imageUrl;
+
+  const _FullScreenImageViewer({required this.imageUrl});
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: Stack(
+        children: [
+          // Full Screen Image
+          InteractiveViewer(
+            minScale: 0.5,
+            maxScale: 4.0,
+            child: SizedBox(
+              width: double.infinity,
+              height: double.infinity,
+              child: CachedNetworkImage(
+                imageUrl: imageUrl,
+                fit: BoxFit.cover,
+                progressIndicatorBuilder: (context, url, progress) => Container(
+                  color: Colors.black,
+                  child: const Center(
+                    child: CircularProgressIndicator(
+                      valueColor: AlwaysStoppedAnimation<Color>(
+                        Colors.purpleAccent,
+                      ),
+                    ),
+                  ),
+                ),
+                errorWidget: (context, url, error) => Container(
+                  color: Colors.black,
+                  child: const Center(
+                    child: Icon(
+                      Icons.error_outline,
+                      color: Colors.white24,
+                      size: 48,
+                    ),
+                  ),
+                ),
+              ),
+            ),
+          ),
+
+          // Close Button
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.all(20),
+              child: GestureDetector(
+                onTap: () => Navigator.of(context).pop(),
+                child: Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    color: Colors.black38,
+                    shape: BoxShape.circle,
+                    border: Border.all(color: Colors.white10),
+                  ),
+                  child: const Icon(
+                    Icons.close_rounded,
+                    color: Colors.white,
+                    size: 24,
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

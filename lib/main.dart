@@ -10,7 +10,7 @@ import 'firebase_options.dart'; // Ensure this file exists via flutterfire confi
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  
+
   // Initialize Firebase
   // If firebase_options.dart is missing, run `flutterfire configure`
   try {
@@ -29,13 +29,17 @@ void main() async {
       // 1. AndroidProvider.debug
       // 2. AndroidProvider.playIntegrity
       // 3. AndroidProvider.playIntegrity (legacy)
-      androidProvider: kReleaseMode ? AndroidProvider.playIntegrity : AndroidProvider.debug,
+      androidProvider: kReleaseMode
+          ? AndroidProvider.playIntegrity
+          : AndroidProvider.debug,
       // Default provider for iOS/macOS is the Device Check provider. You can use the "AppleProvider" enum to choose
       // your preferred provider. Choose from:
       // 1. AppleProvider.appAttest
       // 2. AppleProvider.deviceCheck
       // 3. AppleProvider.debug
-      appleProvider: kReleaseMode ? AppleProvider.deviceCheck : AppleProvider.debug,
+      appleProvider: kReleaseMode
+          ? AppleProvider.deviceCheck
+          : AppleProvider.debug,
     );
   } catch (e) {
     print("Firebase App Check initialization failed: $e");
